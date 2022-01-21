@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,9 +9,9 @@ namespace MultiThreadedApp
 {
     public partial class MainWindow : Window
     {
-        private int shortDelay = 2000;
-        private int mediumDelay = 5000;
-        private int longDelay = 10000;
+        private const int shortDelay = 2000;
+        private const int mediumDelay = 5000;
+        private const int longDelay = 10000;
 
         public MainWindow()
         {
@@ -46,9 +47,20 @@ namespace MultiThreadedApp
         private async void BtnParallelClicked(object sender, RoutedEventArgs e)
         {
             ResultsWindow.Text = "Startup parallel operation";
-            Stopwatch timer = Stopwatch.StartNew();
 
+            // In parallel programming, all operations that are to be executed simultaneously are added to a List of type Task<T>.
+            var parallelTasks = new List<Task>
+            {
+                ShortRunningOperationAsync(),
+                MediumRunningOperationAsync(),
+                LongRunningOperationAsync()
+            };
+
+            // Run all tasks in list concurrently and wait for all to complete
+            Stopwatch timer = Stopwatch.StartNew();
+            await Task.WhenAll(parallelTasks);
             timer.Stop();
+
             ResultsWindow.Text += $"{Environment.NewLine}Total running time: {timer.ElapsedMilliseconds / 1000} seconds";
         }
 
@@ -91,6 +103,16 @@ namespace MultiThreadedApp
         {
             await Task.Delay(longDelay);
             ReportExecution(nameof(LongRunningOperationAsync));
+        }
+
+        private async Task ForceSyncMethodToBeAsync()
+        {
+            await Task.Run(SynchronousMethod);
+        }
+
+        private void SynchronousMethod()
+        {
+            // Do stuff
         }
     }
 }
