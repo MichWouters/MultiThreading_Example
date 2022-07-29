@@ -31,12 +31,13 @@ namespace MultiThreadedApp
             ResultsWindow.Text += $"{Environment.NewLine}Total running time: {timer.ElapsedMilliseconds / 1000} seconds";
         }
 
+        // NEVER USE ASYNC VOID. - Except at the top level statement
         private async void BtnAsyncClicked(object sender, RoutedEventArgs e)
         {
             ResultsWindow.Text = "Startup asynchronous operation";
             Stopwatch timer = Stopwatch.StartNew();
 
-            await ShortRunningOperationAsync();
+            string result = await ShortRunningOperationAsync();
             await MediumRunningOperationAsync();
             await LongRunningOperationAsync();
 
@@ -87,10 +88,11 @@ namespace MultiThreadedApp
             ReportExecution(nameof(LongRunningOperation));
         }
 
-        private async Task ShortRunningOperationAsync()
+        private async Task<string> ShortRunningOperationAsync()
         {
             await Task.Delay(shortDelay);
             ReportExecution(nameof(ShortRunningOperationAsync));
+            return "Hello World";
         }
 
         private async Task MediumRunningOperationAsync()
